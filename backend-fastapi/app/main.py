@@ -1,12 +1,9 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException, Request
 from fastapi.responses import JSONResponse
 from typing import Dict, Set, Optional
 import json
-import asyncio
-from datetime import datetime, timedelta
-import requests
-import threading
-import time
+import os
+from datetime import datetime
 
 app = FastAPI()
 
@@ -14,90 +11,44 @@ app = FastAPI()
 devices: Dict[str, Dict] = {}
 viewers: Set[WebSocket] = set()
 
-# URL actual de ngrok (se actualiza automáticamente)
-current_ngrok_url: Optional[str] = None
-url_lock = threading.Lock()
-
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
 @app.get("/server-url")
-async def get_server_url():
+async def get_server_url(request: Request):
     """
     Retorna la URL actual del servidor WebSocket.
-    Consulta la API local de ngrok para obtener la URL pública actual.
+    En Railway, usa la URL del servicio directamente.
     """
-    global current_ngrok_url
+    # Obtener URL base de Railway desde variables de entorno o headers
+    base_url = os.getenv("RAILWAY_PUBLIC_DOMAIN") or os.getenv("RAILWAY_STATIC_URL")
     
-    with url_lock:
-        if current_ngrok_url:
-            # Convertir http/https a ws/wss
-            ws_url = current_ngrok_url.replace("https://", "wss://").replace("http://", "ws://")
-            if not ws_url.endswith("/ws"):
-                ws_url = f"{ws_url}/ws"
-            return {
-                "ws_url": ws_url,
-                "http_url": current_ngrok_url,
-                "source": "ngrok"
-            }
+    # Si no está en variables de entorno, construir desde el request
+    if not base_url:
+        # Railway proporciona el host en los headers
+        host = request.headers.get("host", "")
+        if host:
+            # Railway siempre usa HTTPS
+            base_url = f"https://{host}"
+        else:
+            # Fallback: usar variable de entorno personalizada o localhost
+            base_url = os.getenv("BASE_URL", "http://localhost:8000")
     
-    # Fallback: URL local
+    # Asegurar que la URL base tenga protocolo
+    if not base_url.startswith(("http://", "https://")):
+        base_url = f"https://{base_url}"
+    
+    # Convertir a WebSocket URL
+    ws_url = base_url.replace("https://", "wss://").replace("http://", "ws://")
+    if not ws_url.endswith("/ws"):
+        ws_url = f"{ws_url}/ws"
+    
     return {
-        "ws_url": "ws://localhost:8000/ws",
-        "http_url": "http://localhost:8000",
-        "source": "local"
+        "ws_url": ws_url,
+        "http_url": base_url,
+        "source": "railway" if "railway" in base_url.lower() or os.getenv("RAILWAY_ENVIRONMENT") else "local"
     }
-
-def get_ngrok_url_from_api() -> Optional[str]:
-    """
-    Consulta la API local de ngrok para obtener la URL pública actual.
-    Retorna None si ngrok no está disponible.
-    """
-    try:
-        response = requests.get("http://localhost:4040/api/tunnels", timeout=2)
-        if response.status_code == 200:
-            data = response.json()
-            tunnels = data.get("tunnels", [])
-            if tunnels:
-                # Obtener el primer túnel HTTP/HTTPS
-                for tunnel in tunnels:
-                    public_url = tunnel.get("public_url", "")
-                    if public_url.startswith(("http://", "https://")):
-                        return public_url
-    except Exception as e:
-        # ngrok no está disponible o no está corriendo
-        pass
-    return None
-
-def update_ngrok_url_periodically():
-    """
-    Actualiza la URL de ngrok periódicamente consultando su API local.
-    Se ejecuta en un hilo separado.
-    """
-    global current_ngrok_url
-    
-    while True:
-        try:
-            new_url = get_ngrok_url_from_api()
-            if new_url:
-                with url_lock:
-                    if current_ngrok_url != new_url:
-                        print(f"[URL Discovery] Nueva URL detectada: {new_url}")
-                        current_ngrok_url = new_url
-            else:
-                # Si no se puede obtener la URL, mantener la anterior
-                # o limpiar si es necesario
-                pass
-        except Exception as e:
-            print(f"[URL Discovery] Error actualizando URL: {e}")
-        
-        # Consultar cada 10 segundos
-        time.sleep(10)
-
-# Iniciar hilo para actualizar URL periódicamente
-url_updater_thread = threading.Thread(target=update_ngrok_url_periodically, daemon=True)
-url_updater_thread.start()
 
 @app.get("/devices")
 async def get_devices():
@@ -189,5 +140,7 @@ async def broadcast_to_viewers(message: Dict):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Railway usa la variable de entorno PORT, localhost usa 8000
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 

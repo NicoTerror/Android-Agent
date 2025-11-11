@@ -14,13 +14,19 @@ android {
         versionCode 1
         versionName "1.0"
 
-        // Configuración de URL del Backend
+        // Configuración de URL del Backend para Railway
+        // PASO 1: Despliega el backend en Railway (ver DESPLIEGUE_RAILWAY.md)
+        // PASO 2: Obtén tu URL de Railway (ej: https://tu-app.railway.app)
+        // PASO 3: Actualiza BASE_URL y WS_URL con tu URL de Railway
+        // PASO 4: Regenera el APK
+        //
         // BASE_URL: URL base HTTP para consultar el endpoint de descubrimiento (sin /ws)
         // WS_URL: URL WebSocket de fallback si el descubrimiento falla
-        // Para ngrok: usar la URL actual de ngrok (ej: https://abc123.ngrok-free.app)
-        // La app consultará automáticamente /server-url para obtener la URL actualizada
-        buildConfigField "String", "BASE_URL", "\"https://seasons-manitoba-dozen-broadband.trycloudflare.com\""
-        buildConfigField "String", "WS_URL", "\"wss://seasons-manitoba-dozen-broadband.trycloudflare.com/ws\""
+        // La app consultará automáticamente BASE_URL/server-url para obtener la URL actualizada
+        //
+        // IMPORTANTE: Reemplaza "TU-URL-RAILWAY" con tu URL real de Railway
+        buildConfigField "String", "BASE_URL", "\"https://TU-URL-RAILWAY.railway.app\""
+        buildConfigField "String", "WS_URL", "\"wss://TU-URL-RAILWAY.railway.app/ws\""
         buildConfigField "String", "API_KEY", "\"devkey\""
     }
 
