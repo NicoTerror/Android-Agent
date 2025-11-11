@@ -1,5 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Set, Optional
 import json
 import os
@@ -7,9 +8,32 @@ from datetime import datetime
 
 app = FastAPI()
 
+# Configurar CORS para permitir peticiones desde el web dashboard
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # En producción, especifica los orígenes permitidos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Estado en memoria
 devices: Dict[str, Dict] = {}
 viewers: Set[WebSocket] = set()
+
+@app.get("/")
+async def root():
+    """Endpoint raíz - información del servicio"""
+    return {
+        "service": "Android Control Backend",
+        "status": "running",
+        "endpoints": {
+            "health": "/health",
+            "server_url": "/server-url",
+            "devices": "/devices",
+            "websocket": "/ws"
+        }
+    }
 
 @app.get("/health")
 async def health():
