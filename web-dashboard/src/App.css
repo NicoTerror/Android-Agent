@@ -1,0 +1,111 @@
+.app {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.header {
+  background: #fff;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.status-indicator {
+  font-size: 1.2rem;
+}
+
+.status-indicator.connected {
+  color: #4caf50;
+}
+
+.status-indicator.disconnected {
+  color: #f44336;
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 1rem 2rem;
+  margin: 1rem 2rem;
+  border-radius: 4px;
+  border-left: 4px solid #c62828;
+}
+
+.main {
+  padding: 2rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.devices-table {
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.devices-table thead {
+  background: #2196f3;
+  color: #fff;
+}
+
+.devices-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.devices-table td {
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.devices-table tbody tr:hover {
+  background: #f5f5f5;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge.on {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.badge.off {
+  background: #ffcdd2;
+  color: #c62828;
+}
+
+.app-name {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #555;
+}
+
