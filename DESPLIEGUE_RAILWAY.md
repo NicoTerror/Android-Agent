@@ -39,14 +39,18 @@ Desplegar el backend FastAPI en Railway para obtener:
 
 ## Paso 3: Configurar el Servicio
 
-Railway debería detectar automáticamente tu proyecto. Si no:
+Railway debería detectar automáticamente tu proyecto usando el `Procfile` en la raíz.
+
+**⚠️ IMPORTANTE**: El `Procfile` debe estar en la **raíz del repositorio**, no en `backend-fastapi/`.
+
+Si Railway no detecta automáticamente:
 
 1. Click en el servicio creado
 2. Ve a la pestaña **"Settings"**
-3. Configura:
-   - **Root Directory**: `backend-fastapi`
+3. Verifica que:
+   - **Root Directory**: (dejar vacío o `/`)
    - **Start Command**: (dejar vacío, usa Procfile)
-   - **Python Version**: 3.11 (o la que prefieras)
+   - **Python Version**: 3.11 (se especifica en `runtime.txt`)
 
 ---
 
@@ -155,12 +159,14 @@ El dashboard se abrirá en `http://localhost:5173` y se conectará automáticame
 
 **Solución**: Railway maneja el puerto automáticamente. Asegúrate de usar `$PORT` en el Procfile.
 
-### Error: "502 Bad Gateway"
+### Error: "502 Bad Gateway" o "Not Found"
 
 **Solución**: 
-1. Verifica los logs en Railway (pestaña "Deployments")
-2. Asegúrate de que el Procfile esté correcto
+1. Verifica que el `Procfile` esté en la **raíz del repositorio** (no en `backend-fastapi/`)
+2. Verifica los logs en Railway (pestaña "Deployments")
 3. Verifica que `main.py` esté en `backend-fastapi/app/`
+4. Verifica que `requirements.txt` esté en `backend-fastapi/`
+5. Si el problema persiste, ver: `SOLUCION_RAILWAY_NOT_FOUND.md`
 
 ### El WebSocket no conecta
 

@@ -25,8 +25,8 @@ android {
         // La app consultará automáticamente BASE_URL/server-url para obtener la URL actualizada
         //
         // IMPORTANTE: Reemplaza "TU-URL-RAILWAY" con tu URL real de Railway
-        buildConfigField "String", "BASE_URL", "\"https://TU-URL-RAILWAY.railway.app\""
-        buildConfigField "String", "WS_URL", "\"wss://TU-URL-RAILWAY.railway.app/ws\""
+        buildConfigField "String", "BASE_URL", "\"https://android-agent-production.up.railway.app\""
+        buildConfigField "String", "WS_URL", "\"wss://android-agent-production.up.railway.app/ws\""
         buildConfigField "String", "API_KEY", "\"devkey\""
     }
 
