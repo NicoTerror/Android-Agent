@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Set, Optional
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 app = FastAPI()
 
@@ -105,7 +105,7 @@ async def websocket_endpoint(
                         "screenOn": message.get("screenOn", False),
                         "volume": message.get("volume", {}),
                         "foregroundApp": message.get("foregroundApp", "unknown"),
-                        "lastSeen": datetime.now().isoformat()
+                        "lastSeen": datetime.now(timezone.utc).isoformat()
                     }
                     
                     # Broadcast a todos los viewers

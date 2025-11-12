@@ -67,7 +67,14 @@ function App() {
                   </td>
                   <td>{device.volume.percent.toFixed(1)}%</td>
                   <td className="app-name">{device.foregroundApp}</td>
-                  <td>{new Date(device.lastSeen).toLocaleTimeString()}</td>
+                  <td>{new Date(device.lastSeen).toLocaleString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  })}</td>
                 </tr>
               ))}
             </tbody>
