@@ -90,6 +90,8 @@ class MetricsService : Service() {
         Log.d(TAG, "Service destroyed")
         metricsJob?.cancel()
         try {
+            // Limpiar sensores cuando el servicio se detiene
+            metricsCollector?.cleanup()
             wsClient?.disconnect()
         } catch (e: Exception) {
             Log.e(TAG, "Error disconnecting WebSocket", e)

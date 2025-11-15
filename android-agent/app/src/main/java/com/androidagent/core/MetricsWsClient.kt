@@ -176,6 +176,10 @@ class MetricsWsClient(private val deviceId: String) {
                     put("percent", metrics.volume.percent)
                 })
                 put("foregroundApp", metrics.foregroundApp)
+                // Incluir screenBlocked (puede ser null si no hay sensor)
+                if (metrics.screenBlocked != null) {
+                    put("screenBlocked", metrics.screenBlocked)
+                }
             }
 
             val sent = webSocket.send(json.toString())

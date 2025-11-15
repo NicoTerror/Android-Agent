@@ -11,6 +11,7 @@ interface Device {
     percent: number
   }
   foregroundApp: string
+  screenBlocked: boolean | null  // null si no se puede determinar
   lastSeen: string
 }
 
@@ -51,6 +52,7 @@ function App() {
               <tr>
                 <th>Device ID</th>
                 <th>Pantalla</th>
+                <th>Pantalla Bloqueada</th>
                 <th>Volumen %</th>
                 <th>App en Foreground</th>
                 <th>Última Actualización</th>
@@ -64,6 +66,17 @@ function App() {
                     <span className={`badge ${device.screenOn ? 'on' : 'off'}`}>
                       {device.screenOn ? 'ON' : 'OFF'}
                     </span>
+                  </td>
+                  <td>
+                    {device.screenBlocked === null ? (
+                      <span className="badge unknown" title="Sensor no disponible">
+                        N/A
+                      </span>
+                    ) : (
+                      <span className={`badge ${device.screenBlocked ? 'blocked' : 'unblocked'}`}>
+                        {device.screenBlocked ? 'BLOQUEADA' : 'LIBRE'}
+                      </span>
+                    )}
                   </td>
                   <td>{device.volume.percent.toFixed(1)}%</td>
                   <td className="app-name">{device.foregroundApp}</td>

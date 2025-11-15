@@ -105,6 +105,7 @@ async def websocket_endpoint(
                         "screenOn": message.get("screenOn", False),
                         "volume": message.get("volume", {}),
                         "foregroundApp": message.get("foregroundApp", "unknown"),
+                        "screenBlocked": message.get("screenBlocked", None),  # Puede ser None si no hay sensor
                         "lastSeen": datetime.now(timezone.utc).isoformat()
                     }
                     
