@@ -9,6 +9,7 @@ interface Device {
     percent: number
   }
   foregroundApp: string
+  screenBlocked: boolean | null  // null si no se puede determinar
   lastSeen: string
 }
 
@@ -53,13 +54,27 @@ export function useWs(url: string): UseWsResult {
             const message = JSON.parse(event.data)
 
             if (message.type === 'snapshot') {
-              setDevices(message.devices || {})
+              // Normalizar dispositivos para asegurar que screenBlocked esté presente
+              const normalizedDevices: Record<string, Device> = {}
+              if (message.devices) {
+                Object.keys(message.devices).forEach((key) => {
+                  const device = message.devices[key]
+                  normalizedDevices[key] = {
+                    ...device,
+                    screenBlocked: device.screenBlocked ?? null
+                  }
+                })
+              }
+              setDevices(normalizedDevices)
             } else if (message.type === 'update') {
               const data = message.data
               if (data.deviceId) {
                 setDevices((prev) => ({
                   ...prev,
-                  [data.deviceId]: data
+                  [data.deviceId]: {
+                    ...data,
+                    screenBlocked: data.screenBlocked ?? null
+                  }
                 }))
               } else if (data.type === 'device_disconnected') {
                 setDevices((prev) => {
