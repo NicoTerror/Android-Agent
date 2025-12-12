@@ -116,7 +116,12 @@ class MetricsCollector(private val context: Context) {
         }
         
         // Calcular promedio de luz del historial para mayor precisión
-        val averageLight = lightHistory.average().toFloat()
+        val sum = lightHistory.sum()
+        val count = lightHistory.size
+        if (count == 0) {
+            return false
+        }
+        val averageLight = (sum / count)
         
         // Si la luz promedio es muy baja, la pantalla está bloqueada
         return averageLight < LIGHT_THRESHOLD

@@ -43,20 +43,28 @@ async def health():
 async def get_server_url(request: Request):
     """
     Retorna la URL actual del servidor WebSocket.
-    En Railway, usa la URL del servicio directamente.
+    Compatible con Fly.io, Railway y Render.
     """
-    # Obtener URL base de Railway desde variables de entorno o headers
-    base_url = os.getenv("RAILWAY_PUBLIC_DOMAIN") or os.getenv("RAILWAY_STATIC_URL")
+    # Obtener URL base - Prioridad: PythonAnywhere, Fly.io, Render, Railway, luego genérico
+    base_url = (
+        os.getenv("PYTHONANYWHERE_SITE") and f"https://{os.getenv('PYTHONANYWHERE_SITE')}.pythonanywhere.com" or  # PythonAnywhere
+        os.getenv("FLY_APP_NAME") and f"https://{os.getenv('FLY_APP_NAME')}.fly.dev" or  # Fly.io
+        os.getenv("RENDER_EXTERNAL_URL") or  # Render
+        os.getenv("RAILWAY_PUBLIC_DOMAIN") or  # Railway
+        os.getenv("RAILWAY_STATIC_URL") or  # Railway alternativo
+        os.getenv("PUBLIC_URL") or  # Variable genérica
+        os.getenv("BASE_URL")  # Fallback personalizado
+    )
     
     # Si no está en variables de entorno, construir desde el request
     if not base_url:
-        # Railway proporciona el host en los headers
         host = request.headers.get("host", "")
         if host:
-            # Railway siempre usa HTTPS
-            base_url = f"https://{host}"
+            # Detectar protocolo - PythonAnywhere, Fly.io, Render, Railway siempre usan HTTPS
+            scheme = "https" if "pythonanywhere.com" in host or "fly.dev" in host or "onrender.com" in host or "railway.app" in host else request.url.scheme
+            base_url = f"{scheme}://{host}"
         else:
-            # Fallback: usar variable de entorno personalizada o localhost
+            # Fallback: localhost
             base_url = os.getenv("BASE_URL", "http://localhost:8000")
     
     # Asegurar que la URL base tenga protocolo
@@ -68,10 +76,21 @@ async def get_server_url(request: Request):
     if not ws_url.endswith("/ws"):
         ws_url = f"{ws_url}/ws"
     
+    # Detectar la plataforma
+    source = "local"
+    if "pythonanywhere.com" in base_url.lower() or os.getenv("PYTHONANYWHERE_SITE"):
+        source = "pythonanywhere"
+    elif "fly.dev" in base_url.lower() or os.getenv("FLY_APP_NAME"):
+        source = "fly.io"
+    elif "render.com" in base_url.lower() or os.getenv("RENDER_EXTERNAL_URL"):
+        source = "render"
+    elif "railway" in base_url.lower() or os.getenv("RAILWAY_ENVIRONMENT"):
+        source = "railway"
+    
     return {
         "ws_url": ws_url,
         "http_url": base_url,
-        "source": "railway" if "railway" in base_url.lower() or os.getenv("RAILWAY_ENVIRONMENT") else "local"
+        "source": source
     }
 
 @app.get("/devices")
